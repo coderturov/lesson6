@@ -19,11 +19,13 @@ budgetVal = document.querySelectorAll(".budget-value")[0],
     year = document.querySelectorAll(".year-value")[0],
     month = document.querySelectorAll(".month-value")[0],
     day = document.querySelectorAll(".day-value")[0];
-    let money, time, getStart, sum;
+    let money, time, getStart, sum, expenses;
 
 
-
+expenses = true;
 getStart = true;
+countBtn.disabled = true;
+expItemBtn.disabled = true;
 start.addEventListener('click', function() {
     time = prompt("Введите дату в формате YYYY-MM-DD", "1989-12-31");
     money = +prompt("Ваш бюджет на месяц?", 90000);
@@ -38,18 +40,25 @@ start.addEventListener('click', function() {
     month.value = new Date(Date.parse(time)).getMonth() + 1;
     day.value = new Date(Date.parse(time)).getDate();
     getStart = false;
+    countBtn.disabled = false;
     for (let i = 0; i < expensesItem.length; i++) {
         if(expensesItem[i].value.trim() != '' && getStart == false){
             expItemBtn.disabled = false;
         }
     }
+    for(let i = 0; i < optExpItem.length; i++) {
+        if(optExpItem[i].value.trim() != '' && getStart == false){
+            optExpBtn.disabled = false;
+            
+        }
+    }
 });
 
-
+//обязательные расходы, проверка условий
 for (let i = 0; i < expensesItem.length; i++) {
     expensesItem[i].addEventListener('change', function() {
         for (let i = 0; i < expensesItem.length; i++) {
-            if(expensesItem[i].value.trim() != '' && getStart == false){
+            if(expensesItem[i].value.trim() != '' && getStart == false ){
                 expItemBtn.disabled = false;
                 console.log("enabled" + i);
             } else {
@@ -61,7 +70,7 @@ for (let i = 0; i < expensesItem.length; i++) {
 }
    
 
-
+//обязательные расходы
 expItemBtn.addEventListener('click', function() {
     sum = 0;
    
@@ -76,18 +85,16 @@ expItemBtn.addEventListener('click', function() {
             
             appData.expenses[item] = cost;
             sum += +cost;
-        } else {
-           
+        } else {  
             i--;
         }
     }
     expenVal.textContent = sum;
-    
 });
 
 
+//необязательные расходы, проверка условий
 optExpBtn.disabled = true;
-
 optExpItem.forEach (function (item, i) {
     item.addEventListener('input', function() {
     if (optExpItem[i].value != '' && getStart != true) {
@@ -101,27 +108,31 @@ optExpItem.forEach (function (item, i) {
         });
     });
     
-
-
+//необязательные расходы    
 optExpBtn.addEventListener('click', function() {
     for(let i = 0; i < optExpItem.length; i++) {
         let optional = optExpItem[i].value;
+       
     if(typeof(optional)=== 'string' && optional != '' && optional != null) {
         
         appData.optionalExpenses[i] = optional;
         
         optExpenVal.textContent += appData.optionalExpenses[i] + ' ';
-   
+        
         } 
     }
+    
 });
+
+
+//Расчет дневного бюджета
+
 
 countBtn.addEventListener('click', function() {
 
     if(appData.budget != undefined) {
         appData.moneyPerDay = ((appData.budget - sum)/30).toFixed();
         dayBudgetVal.textContent = appData.moneyPerDay; 
-    
         if(appData.moneyPerDay < 100) {
             levelVal.textContent = "Минимальный уровень достатка";
         } else if (appData.moneyPerDay > 100 && appData.moneyPerDay < 2000) {
@@ -129,23 +140,23 @@ countBtn.addEventListener('click', function() {
         } else if (appData.moneyPerDay > 2000) {
             levelVal.textContent = "Высокий уровень достатка";
         } else {
-            levelVal.textContent = "Произошла ошибка";
+            levelVal.textContent = "Заполните обязательные расходы";
         }
     }else {
-        dayBudgetVal.textContent = "Произошла ошибка";
+        countBtn.disabled = true;
+        
     }    
 });
+
 
 incomeItem.addEventListener('input', function() {
     let items = incomeItem.value;
         appData.income = items.split(', ');
         incomeVal.textContent = appData.income;
 });
-
 savings.addEventListener('click', function() {
 if (appData.savings == true) {
     appData.savings = false; 
-    
 } else {
     appData.savings = true;
     }
